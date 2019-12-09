@@ -1,12 +1,13 @@
 require "httparty"
 require "json"
+require 'colorize'
 
 class Rubyiot
   include HTTParty
 
   base_uri "https://tr1.api.riotgames.com/"
 
-  @@ritoapikey = "RGAPI-d2bbc60a-2f91-4385-95c8-f4f9d3d1599d"
+  @@ritoapikey = "RGAPI-d1a059f7-387d-497a-8882-b06de398d394"
   def getBySummonerName(summonerName)
     sumName = CGI.escape summonerName.downcase.gsub(/\s/, '')
     getSummonerURL = "/lol/summoner/v4/summoners/by-name/#{sumName}?api_key=#{@@ritoapikey}"
@@ -53,13 +54,37 @@ class Rubyiot
   end
 
   def getChampionMastery(championId)
-    getChampionMasteryURL = "https://tr1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/#{@@summonerId}/by-champion/#{championId}?api_key=#{@@ritoapikey}"
+    getChampionMasteryURL = "/lol/champion-mastery/v4/champion-masteries/by-summoner/#{@@summonerId}/by-champion/#{championId}?api_key=#{@@ritoapikey}"
     urifix = URI.parse(getChampionMasteryURL)
     getChampionMasteryInfo = self.class.get(urifix)
     jsonGetChampionMastery = JSON.parse(getChampionMasteryInfo.body)
   end
 
+  def getChampionMasteryScore
+    getChampionMasteryScoreURL = "/lol/champion-mastery/v4/scores/by-summoner/#{@@summonerId}?api_key=#{@@ritoapikey}"
+    urifix = URI.parse(getChampionMasteryScoreURL)
+    getChampionMasteryScoreInfo = self.class.get(urifix)
+    jsonGetChampionMasteryScore = JSON.parse(getChampionMasteryScoreInfo.body)
+  end
+
+  def getChampionInfo
+    getChampionInfoURL = "/lol/platform/v3/champion-rotations?api_key=#{@@ritoapikey}"
+    urifix = URI.parse(getChampionInfoURL)
+    getChampionInfo = self.class.get(urifix)
+    jsonGetChampionInfo = JSON.parse(getChampionInfo.body)
+  end
 end
 
 api = Rubyiot.new
 info = api.getBySummonerName("KodBilenAdam")
+
+
+a = api.getAllChampionMasteries
+
+def champIdToName champId
+  JSON.parse(File.read("data/champions.json"))["#{champId}"]
+end
+
+# a[0..4].each do|i|
+#   puts "Şampiyon: #{champIdToName i["championId"]} | Şampiyon Puanı: #{i["championPoints"]} | Seviye: #{i["championLevel"]}".colorize(:yellow)
+# end
